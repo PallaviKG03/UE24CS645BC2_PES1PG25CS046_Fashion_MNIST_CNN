@@ -1,22 +1,38 @@
 # UE24CS645BC2_PES1PG25CS046_Fashion_MNIST_CNN
 Project Name: Fashion MNIST CNN
 
-Dataset:
-Fashion MNIST Dataset : Fashion MNIST consists of 70,000 grayscale images of clothing and accessories,
-divided into 10 different classes. 
+This project implements a Convolutional Neural Network (CNN)
+from scratch using NumPy.
 
-CNN Architecture:
-1. Convolution Layer
-2. MaxPooling Layer
-3. Flatten Layer
-4. Fully Connected Layer
-5. Softmax Output Layer
+The CNN is trained on the Fashion MNIST dataset.
 
-Accuracy Achieved:
-90%
+## Features
 
-Technologies Used:
-Python
-TensorFlow
-NumPy
-VS Code
+- Convolution Layer
+- ReLU Activation
+- Max Pooling
+- Fully Connected Layer
+- Softmax
+- Forward Propagation
+- Backpropagation
+- Accuracy vs Epoch Graph
+
+## Dataset
+
+Fashion MNIST
+
+## Libraries Used
+
+- NumPy
+- TensorFlow
+- Matplotlib
+
+## How to Run
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Run:
+
+python train.py
