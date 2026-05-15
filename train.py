@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 from tensorflow.keras.datasets import fashion_mnist
 
-from cnn import ConvLayer, ReLU, MaxPool, Softmax
+from cnn_layers import ConvLayer, ReLU, MaxPool, Softmax
 
 
 # -----------------------------------
@@ -21,9 +20,7 @@ test_images = test_images / 255.0
 # -----------------------------------
 
 conv = ConvLayer(16, 3)
-
 relu = ReLU()
-
 pool = MaxPool()
 
 # 28x28 -> Conv => 26x26
@@ -40,11 +37,8 @@ softmax = Softmax(13 * 13 * 16, 10)
 def forward(image, label):
 
     out = conv.forward(image)
-
     out = relu.forward(out)
-
     out = pool.forward(out)
-
     out = softmax.forward(out)
 
     loss = -np.log(out[label])
@@ -63,13 +57,10 @@ def train(image, label, lr=0.005):
     out, loss, acc = forward(image, label)
 
     gradient = np.zeros(10)
-
     gradient[label] = -1 / out[label]
 
     grad_back = softmax.backward(gradient, lr)
-
     grad_back = pool.backward(grad_back)
-
     grad_back = relu.backward(grad_back)
 
     conv.backward(grad_back, lr)
@@ -83,68 +74,44 @@ def train(image, label, lr=0.005):
 
 epochs = 5
 
+epoch_loss = []
 epoch_accuracy = []
 
 print("Training Started...\n")
 
 for epoch in range(epochs):
 
-    print(f"Epoch {epoch + 1}")
+    total_loss = 0
+    total_correct = 0
 
     permutation = np.random.permutation(len(train_images))
 
     train_images = train_images[permutation]
-
     train_labels = train_labels[permutation]
 
-    loss = 0
-
-    num_correct = 0
-
     # Train on 10000 samples
-    for i, (image, label) in enumerate(
-            zip(train_images[:10000], train_labels[:10000])):
+    for image, label in zip(train_images[:10000], train_labels[:10000]):
 
-        l, acc = train(image, label)
+        loss, acc = train(image, label)
 
-        loss += l
+        total_loss += loss
+        total_correct += acc
 
-        num_correct += acc
 
-        if i % 500 == 499:
+    avg_loss = total_loss / 10000
+    train_acc = total_correct / 10000
 
-            print(
-                f"[Step {i+1}] "
-                f"Avg Loss {loss/500:.3f} | "
-                f"Accuracy {(num_correct/500)*100:.2f}%"
-            )
+    epoch_loss.append(avg_loss)
+    epoch_accuracy.append(train_acc)
 
-            loss = 0
 
-            num_correct = 0
-
-    # -----------------------------------
-    # Evaluate after each epoch
-    # -----------------------------------
-
-    correct = 0
-
-    for image, label in zip(test_images[:2000], test_labels[:2000]):
-
-        out, _, _ = forward(image, label)
-
-        if np.argmax(out) == label:
-            correct += 1
-
-    accuracy = (correct / 2000) * 100
-
-    epoch_accuracy.append(accuracy)
-
-    print(f"Epoch {epoch+1} Test Accuracy: {accuracy:.2f}%\n")
+    print(f"Epoch {epoch+1}/{epochs}")
+    print(f"Loss: {avg_loss:.4f}")
+    print(f"Training Accuracy: {train_acc:.4f}\n")
 
 
 # -----------------------------------
-# Final Evaluation
+# Final Test Accuracy
 # -----------------------------------
 
 correct = 0
@@ -156,28 +123,52 @@ for image, label in zip(test_images[:5000], test_labels[:5000]):
     if np.argmax(out) == label:
         correct += 1
 
+
 final_accuracy = (correct / 5000) * 100
 
-print("\nFinal Test Accuracy:", final_accuracy, "%")
+
+print("=" * 35)
+print(f"Test Accuracy: {final_accuracy:.2f}%")
+print("=" * 35)
 
 
 # -----------------------------------
-# Accuracy vs Epoch Graph
+# Graph 1 : Epoch vs Accuracy
 # -----------------------------------
 
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(7,5))
 
 plt.plot(
-    range(1, epochs + 1),
+    range(1, epochs+1),
     epoch_accuracy,
     marker='o'
 )
 
 plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("Epoch vs Accuracy")
 
-plt.ylabel("Accuracy (%)")
+plt.grid(True)
 
-plt.title("Accuracy vs Epoch")
+plt.show()
+
+
+
+# -----------------------------------
+# Graph 2 : Epoch vs Loss
+# -----------------------------------
+
+plt.figure(figsize=(7,5))
+
+plt.plot(
+    range(1, epochs+1),
+    epoch_loss,
+    marker='o'
+)
+
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Epoch vs Loss")
 
 plt.grid(True)
 
